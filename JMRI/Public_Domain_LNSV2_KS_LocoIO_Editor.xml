@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../XSLT/decoder.xsl"?>
+<!-- Copyright (C) JMRI 2002, 2004, 2007 All rights reserved -->
+<!--                                                                        -->
+<!-- JMRI is free software; you can redistribute it and/or modify it under  -->
+<!-- the terms of version 2 of the GNU General Public License as published  -->
+<!-- by the Free Software Foundation. See the "COPYING" file for a copy     -->
+<!-- of this license.                                                       -->
+<!--                                                                        -->
+<!-- JMRI is distributed in the hope that it will be useful, but WITHOUT    -->
+<!-- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or  -->
+<!-- FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License  -->
+<!-- for more details.                                                      -->
+<decoder-config xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://jmri.org/xml/schema/decoder.xsd" showEmptyPanes="no">
+  <version author="Michael Zimmermann" version="8" lastUpdated="20220829"/>
+  <decoder>
+    <family name="KS" mfg="Public-domain and DIY">
+      <model model="LocoIO-Editor using LNSV2" productID="6" developerID="58" />
+    </family>
+    <programming direct="no" paged="no" register="no" ops="no">
+        <mode>LOCONETSV2MODE</mode>
+    </programming>
+    <variables>
+
+      <variable CV="1" item="CV1:Identificationnumber" readOnly="yes" comment="Identification number">
+        <decVal />
+        <label>Identificationnumber</label>
+		<label xml:lang="de">Identifikationsnummer</label>
+		<tooltip>&lt;html&gt;
+				 Eindeutige Identifikationsnummer, 1...126, Standard = 80 
+				 &lt;/html&gt;
+		</tooltip>
+      </variable>
+
+	  <variable CV="7" item="CV7:Software Version" readOnly="no">
+        <decVal />
+		<label>Software Version</label>
+		<label xml:lang="de">Softwareversion</label>
+		<tooltip>&lt;html&gt;
+				 eigentlich nur lesbar.&lt;br/&gt;
+				 Wird hier der Wert 0 eingetragen, so werden alls CVs auf ihren&lt;br/&gt;
+				 Standardwert zurueckgesetzt. Anschliessend sind alle CVs auf ihren&lt;br/&gt;
+				 richtigen Wert zu setzen (=neue Inbetriebnahme!)&lt;br/&gt;
+				 &lt;/html&gt;
+		</tooltip>
+	  </variable>
+
+      <variable CV="8" item="CV8:ProductID" readOnly="yes" comment="Product ID">
+        <decVal />
+        <label>Product ID</label>
+		<label xml:lang="de">Kennung: LocoIO-SV-Editor</label>
+		<tooltip>LocoIO-SV-Editor = 6</tooltip>
+      </variable>
+
+	  <variable CV="2" item="Advanced Group 1 Option 1" readOnly="no" comment="Own address">
+        <decVal min="0" max="255"/>
+        <label>Own address</label>
+		<label xml:lang="de">eigene Adresse</label>
+		<tooltip>&lt;html&gt;
+				 eigene Adresse, Standard = 80&lt;br/&gt;
+				 Wird bei Erst-IBN eingestellt und sollte danach nicht mehr geaendert werden&lt;br/&gt;
+				 &lt;u&gt;Anmerkung:&lt;/u&gt; die deLoof'schen Module antworten - unabhaengig von der&lt;br/&gt;
+				 Adresse des Senders - immer mit der Ziel-Adresse '80'. Ein Aenderung dieser CV ist&lt;br/&gt;
+				 somit wenig sinnvoll&lt;br/&gt;
+				 &lt;/html&gt;
+		</tooltip>
+	  </variable>
+
+	  <variable CV="3" item="Advanced Group 1 Option 2" readOnly="no" comment="Delay time for B0">
+        <decVal min="0" max="255"/>
+        <label>Delay time for B0</label>
+		<label xml:lang="de">Wartezeit für Telegramm B0</label>
+		<tooltip>&lt;html&gt;
+				 Standard = 10 (entspricht 100ms)&lt;br/&gt;
+				 Wartezeit in 10ms-Schritten für das automatische Senden des&lt;br/&gt;
+				 B0(aus)-Telegramm nach dem Senden eines B0(ein).&lt;br/&gt;
+				 Für das Senden des B0(aus)-Telegramms ist ausserdem 'B0(aus)-Telegramm nach B0(ein)-Telegramm senden' (CV9 Bit 0) zu setzen.&lt;br/&gt;
+				 &lt;/html&gt;
+		</tooltip>
+	  </variable>
+
+	  <variable CV="9" item="Advanced Group 1 Option 3" readOnly="no" mask="XXXXXXXV">
+		<enumVal>
+			<enumChoice value="0">
+				<choice>no</choice>
+				<choice xml:lang="de">ohne</choice>
+			</enumChoice>
+			<enumChoice value="1">
+				<choice>send</choice>
+				<choice xml:lang="de">senden</choice>
+			</enumChoice>
+		</enumVal>
+		<label>B0(off)-Telegram after B0(on)-Telegram</label>
+		<label xml:lang="de">B0(aus)-Telegramm nach B0(ein)-Telegramm</label>
+		<tooltip>&lt;html&gt;
+				 CV9, Bit0 (Standard=B0(aus)-Telegramm nach B0(ein)-Telegramm ohne)&lt;br/&gt;
+				 Nach dem Senden eines B0(ein)-Telegramms in der&lt;br/&gt;
+				 Betriebsart "Steuern" wird nach der Zeit aus CV3 automatisch&lt;br/&gt;
+				 ein B0(aus)-Telegramm gesendet.&lt;br/&gt;
+				 Wird bei Erst-IBN eingestellt und sollte danach nicht mehr geaendert werden&lt;br/&gt;
+				 &lt;/html&gt;
+		</tooltip>
+	  </variable>
+
+    </variables>
+  </decoder>
+
+  <xi:include href="http://jmri.org/xml/decoders/public_domain/pane-KSVersionMap.xml" />
+
+</decoder-config>
