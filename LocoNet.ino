@@ -219,6 +219,9 @@ void HandleLocoNetMessages()
 #endif
   if(LnPacket)
   {
+#if defined OLED
+    monitorLocoNetMessage(LnPacket, 0);
+#endif
     if(ui8_WaitForTelegram)
     {
       LocoNet.processSwitchSensorMessage(LnPacket);
@@ -452,10 +455,7 @@ boolean GetModulAddress(uint16_t ui16_EditValue, uint8_t *ui8_ModulAddress, uint
   return false;
 }
 
-boolean ReadAllModulAddressesFinished()
-{
-  return b_ReadAllModulAddressesFinished;  
-}
+boolean ReadAllModulAddressesFinished() { return b_ReadAllModulAddressesFinished; }
 
 void ReadOnePortOfModule(uint8_t ui8_Addr, uint8_t ui8_SubAddr, uint8_t ui8_Port)
 {

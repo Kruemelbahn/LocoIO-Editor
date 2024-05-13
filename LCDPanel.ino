@@ -102,6 +102,9 @@ uint16_t  ui16_SwitchAddress = 0;
 uint8_t   ui8_TelegramKind = 0;
 boolean   b_SwitchState = false;
 
+// used for LN-Monitor
+boolean   isLNMonitorActive() { return false; }
+
 //=== functions ==================================================
 void CheckAndInitDisplayPanel()
 {
@@ -673,7 +676,7 @@ void HandleDisplayPanel()
     return;
   }
 
-  if(HasNewTelegram() || (ui8_buttons && (ui8_ButtonMirror != ui8_buttons)))
+  if(ui8_buttons && (ui8_ButtonMirror != ui8_buttons))
   {
     ui8_ButtonMirror = ui8_buttons;
     if(ui8_DisplayPanelMode == 0)
@@ -1249,7 +1252,7 @@ void HandleDisplayPanel()
         SetDisplayPanelModeWatchIOTelegram();  // mode = 6
         return;
       }
-      if(b_Display || HasNewTelegram())
+      if(b_Display)
         DisplayTelegrams();
       return;
     } // if(ui8_DisplayPanelMode == 100)
@@ -1561,6 +1564,13 @@ void HandleDisplayPanel()
     }
     return;
   } // if(ui8_DisplayPanelMode == 92)
+  //------------------------------------
+  if(ui8_DisplayPanelMode == 100)
+  {
+    if(HasNewTelegram())
+      DisplayTelegrams();
+    return;
+  } // if(ui8_DisplayPanelMode == 100)
   //------------------------------------
   if(ui8_DisplayPanelMode == 113)
   {

@@ -12,7 +12,7 @@ enum {  ID_DEVICE = 0, ID_OWN, ID_DELAY_B0, ID_UNUSED_2, ID_UNUSED_3, ID_UNUSED_
 #define ADR_MAIN_CONTROLLER   80
 
 static const uint8_t DEVICE_ID = ADR_MAIN_CONTROLLER;   // CV1: Device-ID
-static const uint8_t SW_VERSION = 8;										// CV7: Software-Version
+static const uint8_t SW_VERSION = 9;										// CV7: Software-Version
 static const uint8_t LOCOIOEDIT = 6;										// CV8: Software-ID
 
 #if defined ETHERNET_BOARD

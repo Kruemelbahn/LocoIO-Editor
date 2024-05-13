@@ -27,6 +27,7 @@ uint8_t ui8_DisplayPanelPresent = 0;  // ui8_DisplayPanelPresent: 1 if I2C-OLED-
   5   "Stoerung" is displayed
   6   "Beobachten?" is displayed
   7   "Steuern?" is displayed
+  8   "LN-Monitor?" is displayed
   
  20   (edit) mode for CV1
  21   (edit) mode for CV2
@@ -57,6 +58,7 @@ uint8_t ui8_DisplayPanelPresent = 0;  // ui8_DisplayPanelPresent: 1 if I2C-OLED-
  92   "wird initialisiert..."
  
 100   IO-Telegramm-Anzeige
+101   LN-Monitor-Anzeige
 
 110   Adresseingabe
 111   Telegrammauswahl
@@ -106,6 +108,10 @@ uint8_t   ui8_modulPortType = 0;
 uint16_t  ui16_SwitchAddress = 0;
 uint8_t   ui8_TelegramKind = 0;
 boolean   b_SwitchState = false;
+
+// used for LN-Monitor
+boolean   b_LNMonitorActive = false;
+boolean   isLNMonitorActive() { return b_LNMonitorActive; }
 
 //=== functions originally from GlobalOutPrint.ino ===============
 void binout(uint8_t ui8_Out)
@@ -255,6 +261,14 @@ void SetDisplayPanelModeControl()
 	DisplayClearLowerLines();
   DisplayLine(3, F("Steuern?"));
   ui8_DisplayPanelMode = 7;
+  b_Edit = false;
+}
+
+void SetDisplayPanelLNMonitor()
+{ // mode: 8
+	DisplayClearLowerLines();
+  DisplayLine(3, F("LN-Monitor?"));
+  ui8_DisplayPanelMode = 8;
   b_Edit = false;
 }
 
@@ -688,9 +702,7 @@ void DisplayCV(uint8_t iValue)
     displayPanel.print(F("ro"));
   }
   if(b_EditBinary)
-  {
     displayPanel.cursor(ui8_CursorX, 5);
-  }
 }
 
 void displayPortTypeAsText(uint8_t y, uint8_t iPortType)
@@ -725,16 +737,30 @@ void DisplayTelegrams()
 {
   displayPanel.clear();
   displayPanel.setCursor(0, 0);
-  uint16_t ui16_LocoIOAddress;
-  uint8_t ui8_State;
+  uint16_t ui16_LocoIOAddress(0);
+  uint8_t ui8_State(0);
 	for(uint8_t iLine = 0; iLine < 8; iLine++)
 	{
 	  displayPanel.setCursor(0, iLine);
-		if(GetTelegram(ui16_EditValue + iLine, &ui16_LocoIOAddress, &ui8_State))
-			OutTelegramData(ui16_EditValue + iLine + 1, ui16_LocoIOAddress, ui8_State);
-		else
-      if((ui16_EditValue + iLine) < GetModulMaxData())
-			  decout((ui16_EditValue + iLine + 1) & 0xFF, 3);
+    //----------
+    if(ui8_DisplayPanelMode == 100)
+    { // IO-Telegramm-Anzeige
+      if(GetTelegram(ui16_EditValue + iLine, &ui16_LocoIOAddress, &ui8_State))
+        OutTelegramData(ui16_EditValue + iLine + 1, ui16_LocoIOAddress, ui8_State);
+      else
+        if((ui16_EditValue + iLine) < GetModulMaxData())
+          decout((ui16_EditValue + iLine + 1) & 0xFF, 3);
+    } // if(ui8_DisplayPanelMode == 100)
+    //----------
+    if(ui8_DisplayPanelMode == 101)
+    { // LN-Monitor-Anzeige
+      String s(getDisplayString(iLine));
+      if(!iLine && !s.length()) // initialer Aufruf
+        displayPanel.print(F("LN-Monitor"));
+  	  else
+        displayPanel.print(getDisplayString(iLine));
+    } // if(ui8_DisplayPanelMode == 101)
+    //----------
 	}
 }
 
@@ -780,7 +806,7 @@ void HandleDisplayPanel()
     return;
   }
 
-  if(HasNewTelegram() || (ui8_buttons && (ui8_ButtonMirror != ui8_buttons)))
+  if(ui8_buttons && (ui8_ButtonMirror != ui8_buttons))
   {
     ui8_ButtonMirror = ui8_buttons;
     if(ui8_DisplayPanelMode == 0)
@@ -796,8 +822,8 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "Status?"
       if (ui8_buttons & BUTTON_UP)
-      { // switch to Control
-        SetDisplayPanelModeControl();  // mode = 7
+      { // switch to LN-Monitor
+        SetDisplayPanelLNMonitor(); //mode = 8
       }
       else if (ui8_buttons & BUTTON_DOWN)
       { // switch to IBN
@@ -863,8 +889,8 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "Steuern?"
       if (ui8_buttons & BUTTON_DOWN)
-      { // switch to IBN
-        SetDisplayPanelModeStatus();  // mode = 1
+      { // switch to LN-Monitor
+        SetDisplayPanelLNMonitor(); //mode = 8
       }
       else if (ui8_buttons & BUTTON_UP)
       { // switch to Beobachten?
@@ -876,6 +902,28 @@ void HandleDisplayPanel()
       }
       return;
     } // if(ui8_DisplayPanelMode == 7)
+    //------------------------------------
+    if(ui8_DisplayPanelMode == 8)
+    {
+      // actual ui8_DisplayPanelMode = "LN-Monitor?"
+      if (ui8_buttons & BUTTON_DOWN)
+      { // switch to IBN
+        SetDisplayPanelModeStatus();  // mode = 1
+      }
+      else if (ui8_buttons & BUTTON_UP)
+      { // switch to Control
+        SetDisplayPanelModeControl();  // mode = 7
+      }
+      else if (ui8_buttons & BUTTON_RIGHT)
+      { // switch to monitor LN-Messages
+        ui8_DisplayPanelMode = 101;
+        ui16_EditValue = 0;
+        b_LNMonitorActive = true;
+        clearDisplayStrings();
+        DisplayTelegrams();
+      }
+      return;
+    } // if(ui8_DisplayPanelMode == 8)
     //------------------------------------
     if((ui8_DisplayPanelMode >= 20) && (ui8_DisplayPanelMode <= MAX_MODE))
     {
@@ -1212,9 +1260,7 @@ void HandleDisplayPanel()
           b_Display = true;
         }
         if(b_Display)
-        {
           displayValue4(6, ui16_EditValue);
-        }
       }
       return;
     } // if(ui8_DisplayPanelMode == 77)
@@ -1252,9 +1298,7 @@ void HandleDisplayPanel()
           b_Display = true;
         }
         if(b_Display)
-        {
           displayPortTypeAsText(7, (uint8_t)(ui16_EditValue & 0xFF));
-        }
       }
       return;          
     } // if(ui8_DisplayPanelMode == 78)
@@ -1337,10 +1381,28 @@ void HandleDisplayPanel()
         SetDisplayPanelModeWatchIOTelegram();  // mode = 6
         return;
       }
-      if(b_Display || HasNewTelegram())
+      if(b_Display)
         DisplayTelegrams();
       return;
     } // if(ui8_DisplayPanelMode == 100)
+    //------------------------------------
+    if(ui8_DisplayPanelMode == 101)
+    {
+      // actual ui8_DisplayPanelMode = show LN-Monitor
+      if (ui8_buttons & BUTTON_LEFT)
+      { // switch to LN-Monitor?
+        b_LNMonitorActive = false;
+        SetWaitForTelegram(0);
+				DisplayFirstLine(); 
+			  displayPanel.clearLine(1);
+			  displayPanel.clearLine(2);
+        SetDisplayPanelLNMonitor();  // mode = 8
+        return;
+      }
+      if (ui8_buttons & BUTTON_SELECT)
+        b_LNMonitorActive = !b_LNMonitorActive;
+      return;
+    } // if(ui8_DisplayPanelMode == 101)
     //------------------------------------
     if(ui8_DisplayPanelMode == 110)
     {
@@ -1528,13 +1590,10 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "I²C-Scan"
       if (ui8_buttons & BUTTON_LEFT)
-      { // switch to "I²C-Scan?"
+        // switch to "I²C-Scan?"
         SetDisplayPanelModeScan();
-      }
       else if (ui8_buttons & BUTTON_DOWN)
-      {
-        NextScan();
-      }
+              NextScan();
       return;
     } // if(ui8_DisplayPanelMode == 211)
     //------------------------------------
@@ -1543,9 +1602,8 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "Tastatur-Test"
       if (ui8_buttons & BUTTON_UP)
-      { // switch to I²C-Scan
+        // switch to I²C-Scan
         SetDisplayPanelModeScan();
-      }
       return;
     }
 #endif
@@ -1555,13 +1613,11 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "IP-Address"
       if (ui8_buttons & BUTTON_UP)
-      { // switch to "I²C-Scan ?"
+        // switch to "I²C-Scan ?"
         SetDisplayPanelModeScan();
-      }
       else if (ui8_buttons & BUTTON_DOWN)
-      { // switch to "MAC-Address"
-        SetDisplayPanelModeMacAdr();
-      }
+              // switch to "MAC-Address"
+              SetDisplayPanelModeMacAdr();
       return;
     } // if(ui8_DisplayPanelMode == 220)
     //------------------------------------
@@ -1569,9 +1625,8 @@ void HandleDisplayPanel()
     {
       // actual ui8_DisplayPanelMode = "MAC-Address"
       if (ui8_buttons & BUTTON_FCT_BACK)
-      { // any key returns to "IP-Address"
+        // any key returns to "IP-Address"
         SetDisplayPanelModeIpAdr();
-      }
       return;
     } // if(ui8_DisplayPanelMode == 221)
 #endif
@@ -1602,9 +1657,8 @@ void HandleDisplayPanel()
       SetDisplayPanelBlinkenText();
     }
     else if (!GetWaitForTelegram())
-    { // switch to ask for modul-Port
+      // switch to ask for modul-Port
       SetDisplayPanelModeSVModulPortnumber(); // mode = 76
-    }
     return;
   } // if(ui8_DisplayPanelMode == 80)
   //------------------------------------
@@ -1668,6 +1722,20 @@ void HandleDisplayPanel()
     }
     return;
   } // if(ui8_DisplayPanelMode == 92)
+  //------------------------------------
+  if(ui8_DisplayPanelMode == 100)
+  {
+    if(HasNewTelegram())
+      DisplayTelegrams();
+    return;
+  } // if(ui8_DisplayPanelMode == 100)
+  //------------------------------------
+  if(ui8_DisplayPanelMode == 101)
+  {
+    if(HasNewMonitorTelegram())
+      DisplayTelegrams();
+    return;
+  } // if(ui8_DisplayPanelMode == 101)
   //------------------------------------
   if(ui8_DisplayPanelMode == 113)
   {
