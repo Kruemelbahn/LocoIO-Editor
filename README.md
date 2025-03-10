@@ -7,8 +7,8 @@ For more details please refer to the [manual](Documentation/LocoIO-Editor-Bedien
 
 ### Requested libraries
 LocoIO requires my libraries listed below in addition to various Arduino standard libraries:<br> 
-- [HeartBeat](http://www.github.com/Kruemelbahn/HeartBeat)<br>
-- [I2CKeypad](http://www.github.com/Kruemelbahn/I2CKeypad)<br>
-- [LCDPanel](http://www.github.com/Kruemelbahn/LCDPanel)<br>
-- [LocoNetKS](http://www.github.com/Kruemelbahn/LocoNetKS)<br>
-- [OLEDPanel](http://www.github.com/Kruemelbahn/OLEDPanel)<br>
+- [HeartBeat](https://www.github.com/Kruemelbahn/HeartBeat)<br>
+- [I2CKeypad](https://www.github.com/Kruemelbahn/I2CKeypad)<br>
+- [LCDPanel](https://www.github.com/Kruemelbahn/LCDPanel)<br>
+- [LocoNetKS](https://www.github.com/Kruemelbahn/LocoNetKS)<br>
+- [OLEDPanel](https://www.github.com/Kruemelbahn/OLEDPanel)<br>
