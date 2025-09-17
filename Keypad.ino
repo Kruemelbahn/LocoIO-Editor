@@ -22,9 +22,6 @@ i2ckeypad kpd = i2ckeypad(ui8_KPDi2cAddress);  // default: 4 Rows, 4 Cols
 
 uint8_t ui8_KPDPresent = 0;  // ui8_KPDPresent: 1 if keypad is found
 
-boolean bShowFrediSV(false);
-uint16_t ui16_ThrottleId(0);
-
 //=== functions ==================================================
 uint8_t isKeypadPresent () { return ui8_KPDPresent; }
 uint8_t getKPDAdddress () { return ui8_KPDPresent ? ui8_KPDi2cAddress : 0; }
